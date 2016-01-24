@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "Board.h"
 #include <iostream>
+#include "Menue.h"
 
 int main()
 {		
@@ -15,6 +16,13 @@ int main()
 
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Four Connect");
 	
+	Menue menue;
+	if (!menue.Initialize())
+	{
+		std::cout << "Initialize menue failed!" << std::endl;
+		return -1;
+	}
+
 	Board board(boardColumns, boardRows, boardWidth, boardHeight);
 	if (!board.Initialize())
 	{
@@ -34,8 +42,15 @@ int main()
 		}
 
 		window.clear(sf::Color::Cyan);
-		window.draw(*board.GetDrawableBoard());
-
+		if (menue.IsActive())
+		{
+			menue.Render(window);
+		} 
+		else
+		{
+			window.draw(*board.GetDrawableBoard());
+		}
+		
 		window.display();
 	}
 

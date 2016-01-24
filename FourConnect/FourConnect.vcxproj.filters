@@ -21,9 +21,21 @@
     <ClCompile Include="Board.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Menue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MenueButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Menue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MenueButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
