@@ -13,6 +13,8 @@ public:
 	void Update();
 	void Render(sf::RenderWindow &window) const;
 
+	void CheckClickEvent(sf::Vector2f mouseCoord);
+	void CheckReleaseEvent(sf::Vector2f mouseCoord);
 	bool IsActive() const { return m_isActive; }
 
 private:
@@ -28,6 +30,9 @@ private:
 	MenueButton* m_algo1Button;
 	MenueButton* m_algo2Button;
 	MenueButton* m_algo3Button;
+
+	sf::Text m_textGameMode;
+	sf::Text m_textStarter;
 
 };
 

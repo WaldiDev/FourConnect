@@ -34,10 +34,28 @@ int main()
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
-		{
+		{			
 			if (event.type == sf::Event::Closed)
 			{
 				window.close();
+			} 
+			else if (event.type == sf::Event::MouseButtonPressed)
+			{
+				auto mousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+				auto mouseCoord = window.mapPixelToCoords(mousePos);
+				if (menue.IsActive())
+				{
+					menue.CheckClickEvent(mouseCoord);
+				}
+			}
+			else if (event.type == sf::Event::MouseButtonReleased)
+			{
+				auto mousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+				auto mouseCoord = window.mapPixelToCoords(mousePos);
+				if (menue.IsActive())
+				{
+					menue.CheckReleaseEvent(mouseCoord);
+				}
 			}
 		}
 

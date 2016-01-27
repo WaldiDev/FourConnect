@@ -28,6 +28,22 @@ void MenueButton::Render(sf::RenderWindow& window) const
 	window.draw(m_text);
 }
 
+void MenueButton::OnClick()
+{
+	m_shape.setFillColor(sf::Color(192, 192, 192));
+}
+
+void MenueButton::OnRelease()
+{
+	m_shape.setFillColor(sf::Color::White);
+}
+
+bool MenueButton::CheckClick(sf::Vector2f mouseCoord) const
+{
+	auto shapeRect = m_shape.getGlobalBounds();
+	return shapeRect.contains(mouseCoord);
+}
+
 void MenueButton::CenterText()
 {
 	auto textRect = m_text.getGlobalBounds();

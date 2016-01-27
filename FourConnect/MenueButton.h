@@ -10,6 +10,10 @@ public:
 
 	void Render(sf::RenderWindow &window) const;
 
+	void OnClick();
+	void OnRelease();
+	bool CheckClick(sf::Vector2f mouseCoord) const;
+
 private:
 	void CenterText();
 
