@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+#include "TGUI/TGUI.hpp"
 #include "Board.h"
 #include <iostream>
 #include "Menue.h"
@@ -15,13 +15,15 @@ int main()
 
 
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Four Connect");
-	
-	Menue menue;
-	if (!menue.Initialize())
+	tgui::Gui gui(window);
+	auto button = std::make_shared<tgui::Button>();
+	gui.add(button);
+	//Menue menue;
+	/*if (!menue.Initialize())
 	{
 		std::cout << "Initialize menue failed!" << std::endl;
 		return -1;
-	}
+	}*/
 
 	Board board(boardColumns, boardRows, boardWidth, boardHeight);
 	if (!board.Initialize())
@@ -39,7 +41,19 @@ int main()
 			{
 				window.close();
 			} 
+			else if (event.type == sf::Event::MouseMoved)
+			{
+				sf::Vector2i mousePos(event.mouseMove.x, event.mouseMove.y);
+				auto mouseCoord = window.mapPixelToCoords(mousePos);
+				board.OnMouseMoved(mouseCoord);
+			}
 			else if (event.type == sf::Event::MouseButtonPressed)
+			{
+				sf::Vector2i mousePos(event.mouseButton.x, event.mouseButton.y);
+				auto mouseCoord = window.mapPixelToCoords(mousePos);
+				board.OnMouseButtonPressed(mouseCoord, event.mouseButton.button);
+			}
+			/*else if (event.type == sf::Event::MouseButtonPressed)
 			{
 				auto mousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
 				auto mouseCoord = window.mapPixelToCoords(mousePos);
@@ -56,19 +70,22 @@ int main()
 				{
 					menue.CheckReleaseEvent(mouseCoord);
 				}
-			}
+			}*/
+			gui.handleEvent(event);
 		}
 
 		window.clear(sf::Color::Cyan);
-		if (menue.IsActive())
+		/*if (menue.IsActive())
 		{
 			menue.Render(window);
 		} 
 		else
 		{
 			window.draw(*board.GetDrawableBoard());
-		}
+		}*/
 		
+		//gui.draw();
+		board.Render(window);
 		window.display();
 	}
 
