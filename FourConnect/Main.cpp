@@ -25,7 +25,7 @@ int main()
 		return -1;
 	}*/
 
-	Board board(boardColumns, boardRows, boardWidth, boardHeight);
+	Board board(boardColumns, boardRows, boardWidth, boardHeight, window);
 	if (!board.Initialize())
 	{
 		std::cout << "Initialize board failed!" << std::endl;
@@ -53,24 +53,7 @@ int main()
 				auto mouseCoord = window.mapPixelToCoords(mousePos);
 				board.OnMouseButtonPressed(mouseCoord, event.mouseButton.button);
 			}
-			/*else if (event.type == sf::Event::MouseButtonPressed)
-			{
-				auto mousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
-				auto mouseCoord = window.mapPixelToCoords(mousePos);
-				if (menue.IsActive())
-				{
-					menue.CheckClickEvent(mouseCoord);
-				}
-			}
-			else if (event.type == sf::Event::MouseButtonReleased)
-			{
-				auto mousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
-				auto mouseCoord = window.mapPixelToCoords(mousePos);
-				if (menue.IsActive())
-				{
-					menue.CheckReleaseEvent(mouseCoord);
-				}
-			}*/
+
 			gui.handleEvent(event);
 		}
 
@@ -85,6 +68,10 @@ int main()
 		}*/
 		
 		//gui.draw();
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+		{
+			board.Update();
+		}		
 		board.Render(window);
 		window.display();
 	}
