@@ -1,5 +1,6 @@
 #include "Board.h"
 #include <windows.h>
+#include "Node.h"
 
 Board::Board(int columns, int rows, float width, float height, sf::RenderWindow &window) :
 	m_columns(columns),
@@ -12,6 +13,7 @@ Board::Board(int columns, int rows, float width, float height, sf::RenderWindow 
 {
 	m_boardPieces.resize(m_columns);
 	m_tokens.resize(m_columns);
+	m_startNode = new Node(0);
 }
 
 Board::~Board()
@@ -74,12 +76,63 @@ bool Board::Initialize()
 		m_tokens.at(col) = tokens;
 	}
 
+	// Horizontal win conditions
+	for (auto row = 0; row < m_rows; ++row)
+	{
+		for (auto col = 0; col < 4; ++col)
+		{			
+			auto pos1 = m_rows * (col + 0) + row;
+			auto pos2 = m_rows * (col + 1) + row;
+			auto pos3 = m_rows * (col + 2) + row;
+			auto pos4 = m_rows * (col + 3) + row;
+			std::vector<int> wins;
+			wins.push_back(pos1);
+			wins.push_back(pos2);
+			wins.push_back(pos3);
+			wins.push_back(pos4);
+			m_winConditions.push_back(wins);
+		}
+	}
+
+	// Vertical win conditions
+	for (auto col = 0; col < m_columns; ++col)
+	{
+		for (auto row = 0; row < 3; ++row)
+		{
+			auto pos1 = m_rows * col + row + 0;
+			auto pos2 = m_rows * col + row + 1;
+			auto pos3 = m_rows * col + row + 2;
+			auto pos4 = m_rows * col + row + 3;
+			std::vector<int> wins;
+			wins.push_back(pos1);
+			wins.push_back(pos2);
+			wins.push_back(pos3);
+			wins.push_back(pos4);
+			m_winConditions.push_back(wins);
+		}
+	}
+
+	// Diagonal win conditions
+	DiagonalCheck1(3); 
+	DiagonalCheck1(4); DiagonalCheck1(9);
+	DiagonalCheck1(5); DiagonalCheck1(10); DiagonalCheck1(15);
+	DiagonalCheck1(11); DiagonalCheck1(16); DiagonalCheck1(21);
+	DiagonalCheck1(17); DiagonalCheck1(22);
+	DiagonalCheck1(23);
+
+	DiagonalCheck2(23);
+	DiagonalCheck2(29); DiagonalCheck2(22);
+	DiagonalCheck2(35); DiagonalCheck2(28); DiagonalCheck2(21);
+	DiagonalCheck2(41); DiagonalCheck2(34); DiagonalCheck2(27);
+	DiagonalCheck2(40); DiagonalCheck2(33);
+	DiagonalCheck2(39);
 	return true;
 }
 
 void Board::Update()
 {
-	MinMax(m_board, 1);
+	//MinMax(m_board, 1, 0);
+	MiniMax(m_board, 1, m_startNode, 0);
 }
 
 void Board::Render(sf::RenderWindow& window)
@@ -202,8 +255,20 @@ void Board::RenderBoard(std::vector<std::vector<int>> board)
 
 }
 
-int Board::MinMax(std::vector<std::vector<int>> board, int player)
+int Board::MinMax(std::vector<std::vector<int>> board, int player, int horizont)
 {
+	if (horizont >= 5)
+	{
+		return 0;
+	}
+
+	auto winner = HasWon(board);
+	if (winner != 0)
+		return winner * player;
+
+		auto move = -1;
+	int score = -2;
+
 	for (auto col = 0; col < m_columns; ++col)
 	{
 		auto &column = board.at(col);
@@ -213,23 +278,65 @@ int Board::MinMax(std::vector<std::vector<int>> board, int player)
 			if (token == 0)
 			{
 				token = player;
-				RenderBoard(board);
-				while (!sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+				auto thisScore = MinMax(board, player * -1, horizont);
+				if (thisScore > score)
 				{
+					score = thisScore;
+					move = col * m_columns + row;
 				}
-				while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-				{
-				}
-
-				MinMax(board, player * -1);
-				
-				token = 0;
+				//RenderBoard(board);				
+				token = 0;				
 				break;
 			}
 		}
 				
 	}
-	return 0;
+
+	if (move == -1) return 0;
+	return score;
+}
+
+
+void Board::MiniMax(std::vector<std::vector<int>> board, int player, Node* node, int horizont)
+{
+	auto winner = HasWon(board);
+	
+	//if (winner != 0)
+	//{
+		node->SetWeight(winner);
+		//return;
+	//}
+
+	if (horizont >= 4)
+	{
+		return;
+	}	
+
+	horizont++;
+
+	for (auto col = 0; col < m_columns; ++col)
+	{
+		auto &column = board.at(col);
+		for (auto row = 0; row < m_rows; ++row)
+		{
+			auto &token = column.at(row);
+			if (token == 0)
+			{
+				auto edge = new Edge();
+				edge->SetStartNode(node);
+
+				auto targetNode = new Node(horizont);
+				edge->SetTargetNode(targetNode);
+
+				node->AddEdge(edge);
+
+				token = player;
+				MiniMax(board, player * -1, targetNode, horizont);
+				token = 0;
+				break;
+			}
+		}
+	}
 }
 
 sf::CircleShape Board::Circle(sf::Color color, sf::Vector2f pos)
@@ -238,6 +345,77 @@ sf::CircleShape Board::Circle(sf::Color color, sf::Vector2f pos)
 	token.setPosition(pos);
 	token.setOrigin(m_tokenRadius, m_tokenRadius);
 	token.setFillColor(color);
-
+	
 	return token;
+}
+
+int Board::HasWon(std::vector<std::vector<int>> board)
+{
+	auto raiting = 0;
+	for (auto &condition : m_winConditions)
+	{
+		auto winCounter = 0;
+		for (auto field : condition)
+		{
+			auto col = field / m_rows;
+			int row;
+			if (col == 0)
+			{
+				row = field;
+			}
+			else
+			{
+				row = field % (col * m_rows);
+			}
+			
+			if (!board[col][row] == 0)
+			{
+				winCounter += board[col][row];
+			}			
+		}
+
+		if (winCounter == 3 || winCounter == -3)
+		{
+			raiting += 3;
+		}
+		else if (winCounter == 2 || winCounter == -2)
+		{
+			raiting += 2;
+		}
+		else if (winCounter == 1 || winCounter == -1)
+		{
+			raiting++;
+		}
+		
+		if (winCounter <= -4 )
+		{
+			return -100;
+		}
+		if (winCounter >= 4)
+		{
+			return 100;
+		}		
+	}
+
+	return raiting;
+}
+
+void Board::DiagonalCheck1(int start)
+{
+	std::vector<int> wins;
+	for (auto i = 0; i < 4; ++i)
+	{
+		wins.push_back(start + i * 5);
+	}
+	m_winConditions.push_back(wins);
+}
+
+void Board::DiagonalCheck2(int start)
+{
+	std::vector<int> wins;
+	for (auto i = 0; i < 4; ++i)
+	{
+		wins.push_back(start + i * -7);
+	}
+	m_winConditions.push_back(wins);
 }

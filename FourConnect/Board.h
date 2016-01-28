@@ -1,5 +1,8 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include <list>
+
+class Node;
 
 enum TileState
 {
@@ -24,10 +27,14 @@ public:
 
 	void ComputeNextTurn(int stage);
 	void RenderBoard(std::vector<std::vector<int>> board);
-	int MinMax(std::vector<std::vector<int>> board, int player);
+	int MinMax(std::vector<std::vector<int>> board, int player, int horizont);
+
+	void CreateGraph();
+	void MiniMax(std::vector<std::vector<int>> board, int player, Node* node, int horizont);
 
 	sf::CircleShape Circle(sf::Color color, sf::Vector2f pos);
 private:	
+	Node* m_startNode;
 	sf::RenderWindow& m_window;
 	int m_columns;
 	int m_rows;
@@ -38,10 +45,15 @@ private:
 
 	sf::Color m_boardColor;
 
+	std::list<std::vector<int>> m_winConditions;
 	//sf::RectangleShape* m_board;
 	std::vector<sf::RectangleShape> m_boardPieces;
 	std::vector<std::vector< sf::CircleShape>> m_tokens;
 	std::vector<std::vector< int>> m_board;
+
+	int HasWon(std::vector<std::vector< int>> board);
+	void DiagonalCheck1(int start);
+	void DiagonalCheck2(int start);
 
 };
 
